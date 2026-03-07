@@ -7,7 +7,7 @@ Run `/cc-audit` in any project. Get a structured report telling you what's worki
 ## Requirements
 
 - [Claude Code](https://claude.ai/download) installed and authenticated
-- [Anthropic Documentation MCP](https://github.com/anthropics/anthropic-docs-mcp) configured
+- [Anthropic Documentation MCP](https://github.com/giovicordova/anthropic-docs) configured
 
 ## Installation
 
