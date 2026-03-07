@@ -10,6 +10,8 @@ No code, no build, no tests. Everything is markdown.
 - `skills/cc-audit/SKILL.md` — the skill users run with `/cc-audit`
 - `VISION.md` — product vision (imported above)
 - `README.md` — installation and usage for end users
+- `.claude-plugin/plugin.json` — plugin manifest for distribution
+- `.claude-plugin/marketplace.json` — marketplace registration
 
 # Constraints
 
