@@ -74,7 +74,9 @@ YOUR NEXT TOOL CALL MUST BE AskUserQuestion. Do not call Read, Grep, Glob, or an
 
 ## Phase 3: Confirm with User
 
-YOUR NEXT ACTION MUST BE calling AskUserQuestion. Do not skip this phase.
+IMPORTANT: AskUserQuestion IS available in this context. It works in forked skill contexts — the question is passed through to the user. Do not assume it is unavailable. Do not present the question as text output instead. You MUST call the AskUserQuestion tool.
+
+If you do not call AskUserQuestion, the audit is invalid. If you skipped AskUserQuestion for any reason, STOP and call it now.
 
 Use AskUserQuestion with this message:
 
