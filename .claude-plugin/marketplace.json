@@ -1,0 +1,16 @@
+{
+  "name": "cc-audit-marketplace",
+  "owner": {
+    "name": "Gio Cordova"
+  },
+  "metadata": {
+    "description": "Claude Code audit tools"
+  },
+  "plugins": [
+    {
+      "name": "cc-audit",
+      "source": ".",
+      "description": "Audit any project's Claude Code setup against official Anthropic documentation"
+    }
+  ]
+}

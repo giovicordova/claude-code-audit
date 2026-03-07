@@ -1,0 +1,12 @@
+{
+  "name": "cc-audit",
+  "description": "Audit any project's Claude Code setup against official Anthropic documentation",
+  "version": "1.0.0",
+  "author": {
+    "name": "Gio Cordova"
+  },
+  "homepage": "https://github.com/giovicordova/claude-code-audit",
+  "repository": "https://github.com/giovicordova/claude-code-audit",
+  "license": "MIT",
+  "keywords": ["audit", "claude-code", "best-practices", "documentation"]
+}
