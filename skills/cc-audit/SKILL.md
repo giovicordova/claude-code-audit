@@ -2,23 +2,7 @@
 name: cc-audit
 description: Audit a project's Claude Code setup against official Anthropic documentation. Evaluates CLAUDE.md, skills, sub-agents, hooks, MCP, permissions, settings, and project structure. Produces AUDIT-REPORT.md.
 disable-model-invocation: true
-context: fork
 allowed-tools: Read, Glob, Grep, Write, AskUserQuestion, mcp__anthropic-docs__search_anthropic_docs, mcp__anthropic-docs__get_doc_page, mcp__anthropic-docs__list_doc_sections, mcp__anthropic-docs__index_status
-hooks:
-  Stop:
-    - hooks:
-        - type: agent
-          prompt: >
-            Read AUDIT-REPORT.md in the project root. Verify ALL of the following:
-            1. A 'Project Understanding' section exists with a confirmed project goal
-            2. A 'Current State' table exists with all 8 areas listed
-            3. The 'Findings' section covers all 9 audit areas: CLAUDE.md, Skills, Sub-agents, Hooks, MCP, Permissions, Settings, Feature Selection, Rules
-            4. Every finding has a 'Source' field with a documentation URL
-            5. A 'Priority Actions' section exists
-            6. A 'Next Steps' section exists
-            If AUDIT-REPORT.md does not exist or any check fails, return {"ok": false, "reason": "Missing: [list what's missing]"}.
-            If all checks pass, return {"ok": true}.
-          timeout: 30
 ---
 
 # Claude Code Audit
@@ -74,9 +58,7 @@ YOUR NEXT TOOL CALL MUST BE AskUserQuestion. Do not call Read, Grep, Glob, or an
 
 ## Phase 3: Confirm with User
 
-IMPORTANT: AskUserQuestion IS available in this context. It works in forked skill contexts — the question is passed through to the user. Do not assume it is unavailable. Do not present the question as text output instead. You MUST call the AskUserQuestion tool.
-
-If you do not call AskUserQuestion, the audit is invalid. If you skipped AskUserQuestion for any reason, STOP and call it now.
+You MUST call AskUserQuestion here. Do not skip this step. Do not present the question as text output instead. If you do not call AskUserQuestion, the audit is invalid.
 
 Use AskUserQuestion with this message:
 
