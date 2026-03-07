@@ -21,7 +21,7 @@ If the call fails, use AskUserQuestion to tell the user:
 2. Restart Claude Code
 3. Run `/cc-audit` again
 
-See https://github.com/anthropics/anthropic-docs-mcp for details."
+See https://github.com/giovicordova/anthropic-docs for details."
 
 Then stop. Do not continue the audit.
 
@@ -46,7 +46,7 @@ Read each file from Step 1. For package manifests (package.json, pyproject.toml,
 
 ### Step 3: Map the Claude Code setup
 
-Use Glob to find everything under `.claude/` and any root-level CLAUDE.md or CLAUDE.local.md files. This tells you what features are currently configured.
+Use Glob to find everything under `.claude/` (including `.claude/rules/**/*.md`) and any root-level CLAUDE.md or CLAUDE.local.md files. This tells you what features are currently configured.
 
 ### Step 4: Form your understanding
 
@@ -189,6 +189,21 @@ For each area below:
 - Features being misused (skill where a hook fits better, or vice versa)?
 - Missing features that would serve the project's goal?
 - Overall setup light and efficient, or overengineered?
+
+### 4.9 Rules
+
+**Scan:** `.claude/rules/**/*.md`
+
+**Fetch docs:**
+- `/docs/en/memory`
+
+**Evaluate:**
+- Do rules exist? Should they for this project's size and complexity?
+- Are rules scoped to specific paths using `paths` frontmatter where appropriate?
+- Is each rule file focused on one topic with a descriptive filename?
+- Content in CLAUDE.md that would work better as path-scoped rules?
+- Any rules that conflict with or duplicate CLAUDE.md instructions?
+- Are rules organized into logical subdirectories for larger projects?
 
 ## Phase 5: Write Report
 
