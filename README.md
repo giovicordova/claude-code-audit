@@ -104,8 +104,6 @@ Feed the report into a Plan mode session to implement the recommendations:
 
 The skill fetches the current official documentation at runtime through the Anthropic Documentation MCP. There are no hardcoded checklists. Recommendations stay accurate as Claude Code evolves.
 
-The audit runs in a forked context (`context: fork`) so it doesn't pollute your main conversation with the many file reads and doc fetches it performs. Only the final summary returns to your conversation.
-
 ## License
 
 MIT

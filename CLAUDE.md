@@ -18,7 +18,7 @@ No code, no build, no tests. Everything is markdown.
 - SKILL.md must preserve all 5 phases (Verify Dependencies, Understand Project, Confirm with User, Audit, Write Report)
 - SKILL.md must preserve all 9 audit areas (4.1 CLAUDE.md through 4.9 Rules)
 - SKILL.md must stay under 500 lines
-- SKILL.md frontmatter fields (`context: fork`, `disable-model-invocation: true`, `allowed-tools`) must not change without deliberate reason
+- SKILL.md frontmatter fields (`disable-model-invocation: true`, `allowed-tools`) must not change without deliberate reason
 - Every audit area must have: Scan targets, Fetch docs references, Evaluate checklist
 - Report template in Phase 5 must stay in sync with audit areas
 
