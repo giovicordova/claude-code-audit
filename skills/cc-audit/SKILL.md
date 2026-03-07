@@ -4,6 +4,21 @@ description: Audit a project's Claude Code setup against official Anthropic docu
 disable-model-invocation: true
 context: fork
 allowed-tools: Read, Glob, Grep, Write, AskUserQuestion, mcp__anthropic-docs__search_anthropic_docs, mcp__anthropic-docs__get_doc_page, mcp__anthropic-docs__list_doc_sections, mcp__anthropic-docs__index_status
+hooks:
+  Stop:
+    - hooks:
+        - type: agent
+          prompt: >
+            Read AUDIT-REPORT.md in the project root. Verify ALL of the following:
+            1. A 'Project Understanding' section exists with a confirmed project goal
+            2. A 'Current State' table exists with all 8 areas listed
+            3. The 'Findings' section covers all 9 audit areas: CLAUDE.md, Skills, Sub-agents, Hooks, MCP, Permissions, Settings, Feature Selection, Rules
+            4. Every finding has a 'Source' field with a documentation URL
+            5. A 'Priority Actions' section exists
+            6. A 'Next Steps' section exists
+            If AUDIT-REPORT.md does not exist or any check fails, return {"ok": false, "reason": "Missing: [list what's missing]"}.
+            If all checks pass, return {"ok": true}.
+          timeout: 30
 ---
 
 # Claude Code Audit
@@ -50,12 +65,16 @@ Use Glob to find everything under `.claude/` (including `.claude/rules/**/*.md`)
 
 ### Step 4: Form your understanding
 
-Write down:
-- What the project is (1-2 sentences)
-- What it is trying to achieve (1-2 sentences)
-- What Claude Code features are currently in use
+Write down in this exact format:
+- **PROJECT**: [what the project is, 1-2 sentences]
+- **GOAL**: [what it's trying to achieve, 1-2 sentences]
+- **CLAUDE CODE FEATURES IN USE**: [list]
+
+YOUR NEXT TOOL CALL MUST BE AskUserQuestion. Do not call Read, Grep, Glob, or any other tool next.
 
 ## Phase 3: Confirm with User
+
+YOUR NEXT ACTION MUST BE calling AskUserQuestion. Do not skip this phase.
 
 Use AskUserQuestion with this message:
 
@@ -67,15 +86,23 @@ Claude Code features currently in use: [list what you found]
 
 Is this accurate, or do you have additional documentation I should review?"
 
-Wait for the user's response. If they correct you or point to more files, read those files and update your understanding. Do not proceed until confirmed.
+Wait for the user's response. If they correct you or point to more files, read those files and update your understanding.
+
+After the user confirms, write:
+
+**CONFIRMED GOAL**: [the user-confirmed goal, in their words or yours if they said "yes"]
+
+Do not proceed to Phase 4 until you have written CONFIRMED GOAL above.
 
 ## Phase 4: Audit
+
+Using the CONFIRMED GOAL from Phase 3, audit each area below. If you have not yet confirmed the goal with the user, STOP and go back to Phase 3.
 
 For each area below:
 1. Read what currently exists in the project for this area
 2. Fetch the relevant official doc page using `mcp__anthropic-docs__get_doc_page`
 3. Compare the current state against the documentation
-4. Filter through the project's confirmed goal — only include findings that matter for this project
+4. Filter through the CONFIRMED GOAL — only include findings that serve this project
 5. Tag each finding: **good** (keep this), **improve** (works but suboptimal), **fix** (against best practices)
 6. Record the doc source URL
 
