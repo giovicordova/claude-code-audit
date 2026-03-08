@@ -14,15 +14,6 @@ No code, no build, no tests. Everything is markdown.
 - `.claude-plugin/plugin.json` — plugin manifest for distribution
 - `.claude-plugin/marketplace.json` — marketplace registration
 
-# Constraints
-
-- SKILL.md must preserve all 5 phases (Verify Dependencies, Understand Project, Confirm with User, Audit, Write Report)
-- SKILL.md must preserve all 9 audit areas (4.1 CLAUDE.md through 4.9 Rules)
-- SKILL.md must stay under 500 lines
-- SKILL.md frontmatter fields (`disable-model-invocation: true`, `allowed-tools`) must not change without deliberate reason
-- Every audit area must have: Scan targets, Fetch docs references, Evaluate checklist
-- Report template in Phase 5 must stay in sync with audit areas
-
 # Workflow
 
 - Commit format: `type: description` (e.g., `feat:`, `fix:`, `docs:`, `improve:`)

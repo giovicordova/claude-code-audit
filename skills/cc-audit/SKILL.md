@@ -1,6 +1,6 @@
 ---
 name: cc-audit
-description: Audit a project's Claude Code setup against official Anthropic documentation. Evaluates CLAUDE.md, skills, sub-agents, hooks, MCP, permissions, settings, and project structure. Produces AUDIT-REPORT.md.
+description: Audit a project's Claude Code setup against official Anthropic documentation. Evaluates CLAUDE.md, skills, sub-agents, hooks, MCP, permissions, settings, feature selection, and rules. Produces AUDIT-REPORT.md.
 disable-model-invocation: true
 allowed-tools: Read, Glob, Grep, Write, AskUserQuestion, mcp__anthropic-docs__search_anthropic_docs, mcp__anthropic-docs__get_doc_page, mcp__anthropic-docs__list_doc_sections, mcp__anthropic-docs__index_status
 ---
