@@ -2,8 +2,7 @@
 
 # Project
 
-CC Audit is a Claude Code skill. The entire product is `skills/cc-audit/SKILL.md`.
-No code, no build, no tests. Everything is markdown.
+CC Audit is a Claude Code skill. The core product is `skills/cc-audit/SKILL.md`.
 
 # Architecture
 
@@ -12,6 +11,9 @@ No code, no build, no tests. Everything is markdown.
 - `README.md` — installation and usage for end users
 - `.claude-plugin/plugin.json` — plugin manifest for distribution
 - `.claude-plugin/marketplace.json` — marketplace registration
+- `scripts/sync-docs.mjs` — docs drift detection script (compares Claude Code docs against stored manifest)
+- `scripts/docs-manifest.json` — stored snapshot of Claude Code doc pages (committed to git)
+- `scripts/sync-docs.test.mjs` — tests for the sync script
 
 # Constraints
 

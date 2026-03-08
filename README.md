@@ -104,6 +104,16 @@ Feed the report into a Plan mode session to implement the recommendations:
 
 The skill fetches the current official documentation at runtime through the Anthropic Documentation MCP. There are no hardcoded checklists. Recommendations stay accurate as Claude Code evolves.
 
+## Docs Sync
+
+The audit areas and doc path references in SKILL.md can fall behind when Anthropic updates their docs. To check for drift:
+
+```bash
+node scripts/sync-docs.mjs
+```
+
+This fetches the latest Claude Code docs, compares against the stored manifest (`scripts/docs-manifest.json`), and writes `DRIFT-REPORT.md` with any changes — new pages, removed pages, changed sections, broken references, and coverage gaps. Review the report and update SKILL.md as needed.
+
 ## License
 
 MIT
