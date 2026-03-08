@@ -107,3 +107,46 @@ export function diffManifests(oldManifest, newPages) {
 
   return { added, removed, changed };
 }
+
+export function parseSkillRefs(skillContent) {
+  const refs = {};
+  const lines = skillContent.split("\n");
+  let currentArea = null;
+  let inFetchDocs = false;
+
+  for (const line of lines) {
+    const areaMatch = line.match(/^###\s+(4\.\d+\s+.+)$/);
+    if (areaMatch) {
+      currentArea = areaMatch[1].trim();
+      refs[currentArea] = [];
+      inFetchDocs = false;
+      continue;
+    }
+
+    if (line.includes("**Fetch docs:**")) {
+      inFetchDocs = true;
+      continue;
+    }
+
+    if (inFetchDocs && (line.startsWith("**") || line.startsWith("###") || line.startsWith("##"))) {
+      inFetchDocs = false;
+      if (line.startsWith("###")) {
+        const reMatch = line.match(/^###\s+(4\.\d+\s+.+)$/);
+        if (reMatch) {
+          currentArea = reMatch[1].trim();
+          refs[currentArea] = [];
+        }
+      }
+      continue;
+    }
+
+    if (inFetchDocs && currentArea) {
+      const pathMatch = line.match(/`(\/docs\/en\/[^`]+)`/);
+      if (pathMatch) {
+        refs[currentArea].push(pathMatch[1]);
+      }
+    }
+  }
+
+  return refs;
+}

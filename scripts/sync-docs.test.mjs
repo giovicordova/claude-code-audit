@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import { strict as assert } from "node:assert";
-import { parsePages, diffManifests } from "./sync-docs.mjs";
+import { parsePages, diffManifests, parseSkillRefs } from "./sync-docs.mjs";
 
 describe("parsePages", () => {
   it("parses a single page from llms-full.txt format", () => {
@@ -159,5 +159,49 @@ describe("diffManifests", () => {
     assert.equal(diff.added.length, 0);
     assert.equal(diff.removed.length, 0);
     assert.equal(diff.changed.length, 0);
+  });
+});
+
+describe("parseSkillRefs", () => {
+  it("extracts doc paths grouped by audit area", () => {
+    const skillContent = `
+### 4.1 CLAUDE.md
+
+**Fetch docs:**
+- \`/docs/en/memory\`
+- \`/docs/en/best-practices\`
+
+**Evaluate:**
+- Does it exist?
+
+### 4.2 Skills
+
+**Fetch docs:**
+- \`/docs/en/skills\`
+
+**Evaluate:**
+- Has frontmatter?
+`;
+    const refs = parseSkillRefs(skillContent);
+    assert.deepEqual(refs["4.1 CLAUDE.md"], ["/docs/en/memory", "/docs/en/best-practices"]);
+    assert.deepEqual(refs["4.2 Skills"], ["/docs/en/skills"]);
+  });
+
+  it("returns all unique doc paths", () => {
+    const skillContent = `
+### 4.1 CLAUDE.md
+
+**Fetch docs:**
+- \`/docs/en/memory\`
+- \`/docs/en/best-practices\`
+
+### 4.9 Rules
+
+**Fetch docs:**
+- \`/docs/en/memory\`
+`;
+    const refs = parseSkillRefs(skillContent);
+    const allPaths = [...new Set(Object.values(refs).flat())];
+    assert.equal(allPaths.length, 2);
   });
 });
