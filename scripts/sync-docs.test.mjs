@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import { strict as assert } from "node:assert";
-import { parsePages } from "./sync-docs.mjs";
+import { parsePages, diffManifests } from "./sync-docs.mjs";
 
 describe("parsePages", () => {
   it("parses a single page from llms-full.txt format", () => {
@@ -78,5 +78,86 @@ Stuff.
     const pages = parsePages(text);
     assert.equal(pages.length, 1);
     assert.equal(pages[0].path, "/docs/en/real");
+  });
+});
+
+describe("diffManifests", () => {
+  it("detects new pages", () => {
+    const oldManifest = {
+      pages: {
+        "/docs/en/memory": { title: "Memory", contentHash: "aaa", headings: ["Overview"] },
+      },
+    };
+    const newPages = [
+      { title: "Memory", path: "/docs/en/memory", contentHash: "aaa", headings: ["Overview"] },
+      { title: "Skills", path: "/docs/en/skills", contentHash: "bbb", headings: ["Setup"] },
+    ];
+    const diff = diffManifests(oldManifest, newPages);
+    assert.equal(diff.added.length, 1);
+    assert.equal(diff.added[0].path, "/docs/en/skills");
+    assert.equal(diff.removed.length, 0);
+    assert.equal(diff.changed.length, 0);
+  });
+
+  it("detects removed pages", () => {
+    const oldManifest = {
+      pages: {
+        "/docs/en/memory": { title: "Memory", contentHash: "aaa", headings: ["Overview"] },
+        "/docs/en/skills": { title: "Skills", contentHash: "bbb", headings: ["Setup"] },
+      },
+    };
+    const newPages = [
+      { title: "Memory", path: "/docs/en/memory", contentHash: "aaa", headings: ["Overview"] },
+    ];
+    const diff = diffManifests(oldManifest, newPages);
+    assert.equal(diff.added.length, 0);
+    assert.equal(diff.removed.length, 1);
+    assert.equal(diff.removed[0].path, "/docs/en/skills");
+    assert.equal(diff.changed.length, 0);
+  });
+
+  it("detects content changes via hash", () => {
+    const oldManifest = {
+      pages: {
+        "/docs/en/memory": { title: "Memory", contentHash: "aaa", headings: ["Overview"] },
+      },
+    };
+    const newPages = [
+      { title: "Memory", path: "/docs/en/memory", contentHash: "bbb", headings: ["Overview"] },
+    ];
+    const diff = diffManifests(oldManifest, newPages);
+    assert.equal(diff.changed.length, 1);
+    assert.equal(diff.changed[0].path, "/docs/en/memory");
+  });
+
+  it("detects heading changes", () => {
+    const oldManifest = {
+      pages: {
+        "/docs/en/memory": { title: "Memory", contentHash: "aaa", headings: ["Overview", "Setup"] },
+      },
+    };
+    const newPages = [
+      { title: "Memory", path: "/docs/en/memory", contentHash: "bbb", headings: ["Overview", "Configuration", "Advanced"] },
+    ];
+    const diff = diffManifests(oldManifest, newPages);
+    assert.equal(diff.changed[0].addedHeadings.length, 2);
+    assert.equal(diff.changed[0].removedHeadings.length, 1);
+    assert.deepEqual(diff.changed[0].addedHeadings, ["Configuration", "Advanced"]);
+    assert.deepEqual(diff.changed[0].removedHeadings, ["Setup"]);
+  });
+
+  it("returns empty diff when nothing changed", () => {
+    const oldManifest = {
+      pages: {
+        "/docs/en/memory": { title: "Memory", contentHash: "aaa", headings: ["Overview"] },
+      },
+    };
+    const newPages = [
+      { title: "Memory", path: "/docs/en/memory", contentHash: "aaa", headings: ["Overview"] },
+    ];
+    const diff = diffManifests(oldManifest, newPages);
+    assert.equal(diff.added.length, 0);
+    assert.equal(diff.removed.length, 0);
+    assert.equal(diff.changed.length, 0);
   });
 });

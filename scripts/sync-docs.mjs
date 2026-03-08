@@ -77,3 +77,33 @@ export function parsePages(text) {
 
   return pages;
 }
+
+export function diffManifests(oldManifest, newPages) {
+  const oldPages = oldManifest.pages || {};
+  const newByPath = Object.fromEntries(newPages.map((p) => [p.path, p]));
+  const oldPaths = new Set(Object.keys(oldPages));
+  const newPaths = new Set(Object.keys(newByPath));
+
+  const added = newPages.filter((p) => !oldPaths.has(p.path));
+
+  const removed = [...oldPaths]
+    .filter((p) => !newPaths.has(p))
+    .map((p) => ({ path: p, title: oldPages[p].title }));
+
+  const changed = [];
+  for (const path of oldPaths) {
+    if (!newPaths.has(path)) continue;
+    const oldPage = oldPages[path];
+    const newPage = newByPath[path];
+    if (oldPage.contentHash === newPage.contentHash) continue;
+
+    const oldHeadings = new Set(oldPage.headings);
+    const newHeadings = new Set(newPage.headings);
+    const addedHeadings = newPage.headings.filter((h) => !oldHeadings.has(h));
+    const removedHeadings = oldPage.headings.filter((h) => !newHeadings.has(h));
+
+    changed.push({ path, title: newPage.title, addedHeadings, removedHeadings });
+  }
+
+  return { added, removed, changed };
+}
