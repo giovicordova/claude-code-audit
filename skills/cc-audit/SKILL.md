@@ -115,6 +115,8 @@ For each area below:
 **Fetch docs:**
 - `/docs/en/skills`
 
+**Read reference:** `references/skills-guide.md` — official Anthropic skill-building guide covering technical requirements, YAML frontmatter rules, naming conventions, description best practices, patterns, and troubleshooting. Use this alongside the MCP docs to evaluate skills.
+
 **Evaluate:**
 - Proper YAML frontmatter (name, description)?
 - Descriptions clear enough for Claude to know when to use them?
