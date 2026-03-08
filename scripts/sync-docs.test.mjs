@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import { strict as assert } from "node:assert";
-import { parsePages, diffManifests, parseSkillRefs } from "./sync-docs.mjs";
+import { parsePages, diffManifests, parseSkillRefs, generateReport } from "./sync-docs.mjs";
 
 describe("parsePages", () => {
   it("parses a single page from llms-full.txt format", () => {
@@ -203,5 +203,52 @@ describe("parseSkillRefs", () => {
     const refs = parseSkillRefs(skillContent);
     const allPaths = [...new Set(Object.values(refs).flat())];
     assert.equal(allPaths.length, 2);
+  });
+});
+
+describe("generateReport", () => {
+  it("reports all clear when no drift and full coverage", () => {
+    const diff = { added: [], removed: [], changed: [] };
+    const skillRefs = { "4.1 CLAUDE.md": ["/docs/en/memory"] };
+    const allPages = [{ path: "/docs/en/memory", title: "Memory" }];
+    const report = generateReport(diff, skillRefs, allPages, "2026-03-08");
+    assert.ok(report.includes("No drift detected"));
+    assert.ok(!report.includes("## Broken References"));
+    assert.ok(!report.includes("## Coverage Gaps"));
+  });
+
+  it("reports broken refs and coverage gaps", () => {
+    const diff = { added: [], removed: [], changed: [] };
+    const skillRefs = { "4.1 CLAUDE.md": ["/docs/en/memory", "/docs/en/gone"] };
+    const allPages = [
+      { path: "/docs/en/memory", title: "Memory" },
+      { path: "/docs/en/skills", title: "Skills" },
+    ];
+    const report = generateReport(diff, skillRefs, allPages, "2026-03-08");
+    assert.ok(report.includes("## Broken References"));
+    assert.ok(report.includes("`/docs/en/gone`"));
+    assert.ok(report.includes("## Coverage Gaps"));
+    assert.ok(report.includes("`/docs/en/skills`"));
+  });
+
+  it("reports mixed drift — added, changed, removed", () => {
+    const diff = {
+      added: [{ path: "/docs/en/new", title: "New Feature" }],
+      removed: [{ path: "/docs/en/old", title: "Old Feature" }],
+      changed: [{ path: "/docs/en/memory", title: "Memory", addedHeadings: ["Rules"], removedHeadings: [] }],
+    };
+    const skillRefs = { "4.1 CLAUDE.md": ["/docs/en/memory"] };
+    const allPages = [
+      { path: "/docs/en/memory", title: "Memory" },
+      { path: "/docs/en/new", title: "New Feature" },
+    ];
+    const report = generateReport(diff, skillRefs, allPages, "2026-03-08");
+    assert.ok(report.includes("## New Pages"));
+    assert.ok(report.includes("New Feature"));
+    assert.ok(report.includes("**(not covered)**"));
+    assert.ok(report.includes("## Changed Pages"));
+    assert.ok(report.includes("+ Rules"));
+    assert.ok(report.includes("## Removed Pages"));
+    assert.ok(report.includes("Old Feature"));
   });
 });

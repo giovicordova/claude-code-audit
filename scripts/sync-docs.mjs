@@ -259,7 +259,7 @@ export function generateReport(diff, skillRefs, allPages, date) {
 
 function readManifest() {
   if (!existsSync(MANIFEST_PATH)) {
-    return { generatedAt: null, sourceHash: null, pages: {} };
+    return { generatedAt: null, pages: {} };
   }
   return JSON.parse(readFileSync(MANIFEST_PATH, "utf-8"));
 }
