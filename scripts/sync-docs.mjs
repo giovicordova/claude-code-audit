@@ -256,3 +256,88 @@ export function generateReport(diff, skillRefs, allPages, date) {
 
   return lines.join("\n");
 }
+
+function readManifest() {
+  if (!existsSync(MANIFEST_PATH)) {
+    return { generatedAt: null, sourceHash: null, pages: {} };
+  }
+  return JSON.parse(readFileSync(MANIFEST_PATH, "utf-8"));
+}
+
+function writeManifest(pages) {
+  const manifest = {
+    generatedAt: new Date().toISOString(),
+    pages: Object.fromEntries(
+      pages.map((p) => [p.path, { title: p.title, contentHash: p.contentHash, headings: p.headings }])
+    ),
+  };
+  writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2) + "\n");
+  return manifest;
+}
+
+async function main() {
+  console.log("Fetching Claude Code docs...");
+  const response = await fetch(DOCS_URL);
+  if (!response.ok) {
+    console.error(`Failed to fetch docs: HTTP ${response.status}`);
+    process.exit(1);
+  }
+  const text = await response.text();
+
+  console.log("Parsing pages...");
+  const pages = parsePages(text);
+  console.log(`Found ${pages.length} pages.`);
+
+  console.log("Reading stored manifest...");
+  const oldManifest = readManifest();
+  const isFirstRun = oldManifest.generatedAt === null;
+
+  console.log("Reading SKILL.md...");
+  const skillContent = readFileSync(SKILL_PATH, "utf-8");
+  const skillRefs = parseSkillRefs(skillContent);
+  const coveredPaths = new Set(Object.values(skillRefs).flat());
+  console.log(`SKILL.md references ${coveredPaths.size} unique doc paths across ${Object.keys(skillRefs).length} audit areas.`);
+
+  if (isFirstRun) {
+    console.log("First run — generating initial manifest (no diff to compare).");
+    writeManifest(pages);
+    console.log(`Manifest saved to ${MANIFEST_PATH}`);
+
+    const emptyDiff = { added: [], removed: [], changed: [] };
+    const date = new Date().toISOString().split("T")[0];
+    const report = generateReport(emptyDiff, skillRefs, pages, date);
+    writeFileSync(REPORT_PATH, report);
+    console.log(`Coverage report saved to ${REPORT_PATH}`);
+    return;
+  }
+
+  console.log("Diffing against stored manifest...");
+  const diff = diffManifests(oldManifest, pages);
+
+  const date = new Date().toISOString().split("T")[0];
+  const report = generateReport(diff, skillRefs, pages, date);
+  writeFileSync(REPORT_PATH, report);
+  console.log(`Report saved to ${REPORT_PATH}`);
+
+  writeManifest(pages);
+  console.log(`Manifest updated at ${MANIFEST_PATH}`);
+
+  console.log("");
+  console.log("--- Summary ---");
+  console.log(`New pages:     ${diff.added.length}`);
+  console.log(`Changed pages: ${diff.changed.length}`);
+  console.log(`Removed pages: ${diff.removed.length}`);
+
+  if (diff.added.length === 0 && diff.changed.length === 0 && diff.removed.length === 0) {
+    console.log("No drift detected.");
+  }
+}
+
+// Run if executed directly
+const isMain = process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
+if (isMain) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
