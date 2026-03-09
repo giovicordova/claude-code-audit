@@ -8,6 +8,7 @@ Run `/cc-audit` in any project. Get a structured report telling you what's worki
 
 - [Claude Code](https://claude.ai/download) installed and authenticated
 - [Anthropic Documentation MCP](https://github.com/giovicordova/anthropic-docs) configured
+- [Playwright CLI](https://github.com/microsoft/playwright-cli) (optional fallback — used if Anthropic Documentation MCP is unavailable or a page fails to load)
 
 ## Installation
 
@@ -102,7 +103,7 @@ Feed the report into a Plan mode session to implement the recommendations:
 
 ## How It Works
 
-The skill fetches the current official documentation at runtime through the Anthropic Documentation MCP. There are no hardcoded checklists. Recommendations stay accurate as Claude Code evolves.
+The skill fetches the current official documentation at runtime through the Anthropic Documentation MCP. If a doc page is unavailable through the MCP, the skill falls back to Playwright CLI for token-efficient browser fetching. There are no hardcoded checklists. Recommendations stay accurate as Claude Code evolves.
 
 ## License
 

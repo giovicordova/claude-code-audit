@@ -2,27 +2,63 @@
 name: cc-audit
 description: Audit a project's Claude Code setup against official Anthropic documentation. Evaluates CLAUDE.md, skills, sub-agents, hooks, MCP, permissions, settings, feature selection, and rules. Produces AUDIT-REPORT.md.
 disable-model-invocation: true
-allowed-tools: Read, Glob, Grep, Write, AskUserQuestion, mcp__anthropic-docs__search_anthropic_docs, mcp__anthropic-docs__get_doc_page, mcp__anthropic-docs__list_doc_sections, mcp__anthropic-docs__index_status
+allowed-tools: Read, Glob, Grep, Write, Bash, AskUserQuestion, mcp__anthropic-docs__search_anthropic_docs, mcp__anthropic-docs__get_doc_page, mcp__anthropic-docs__list_doc_sections, mcp__anthropic-docs__index_status
 ---
 
 # Claude Code Audit
 
 You are auditing a project's Claude Code setup against the official Anthropic documentation. Follow each phase in order. Every recommendation must have two anchors: proof from the official docs, and a reason tied to the project's goal. If a best practice exists in the docs but does not serve the project, leave it out of the report.
 
-## Phase 1: Verify Dependencies
+STRICT RULE: Never generate a finding without a retrieved doc source. If you cannot fetch the documentation for a topic through any available method, exclude that topic entirely — do not guess, paraphrase from memory, or fabricate a source URL.
 
-Call `mcp__anthropic-docs__index_status` to confirm the Anthropic Documentation MCP is available.
+## Phase 1: Verify Documentation Sources
 
-If the call fails, use AskUserQuestion to tell the user:
+Check which documentation sources are available, in order:
 
-"The CC Audit skill requires the Anthropic Documentation MCP. To set it up:
+1. **Try MCP first** — call `mcp__anthropic-docs__index_status`
+   - If it succeeds → documentation mode is **MCP-primary** (MCP default, Playwright fallback)
+2. **If MCP failed, try Playwright CLI** — run `npx @playwright/cli open https://docs.anthropic.com/en/docs/claude-code/overview` then `npx @playwright/cli snapshot` to confirm it loads
+   - If it loads → documentation mode is **Playwright-only**
+   - Close the browser with `npx @playwright/cli close`
+3. **Both failed → stop.** Use AskUserQuestion to tell the user:
+
+"CC Audit requires at least one documentation source. Set up either:
+
+**Option A — Anthropic Documentation MCP (recommended):**
 1. Run: `claude mcp add anthropic-docs -- npx -y @anthropic-ai/anthropic-docs-mcp`
 2. Restart Claude Code
-3. Run `/cc-audit` again
+
+**Option B — Playwright CLI:**
+1. Run: `npm install -g @playwright/cli`
+2. Restart Claude Code
 
 See https://github.com/giovicordova/anthropic-docs for details."
 
 Then stop. Do not continue the audit.
+
+Output the active documentation mode before proceeding.
+
+## Documentation Fetching Protocol
+
+This defines how "Fetch docs" works in every audit area of Phase 4.
+
+**MCP-primary mode:**
+1. Call `mcp__anthropic-docs__get_doc_page` with the listed path
+2. If content returned → use it, record URL
+3. If empty/error → fall back to Playwright CLI fetch
+
+**Playwright CLI fetch (fallback or primary):**
+1. Run `npx @playwright/cli open https://docs.anthropic.com/en/docs/claude-code/[topic]` (map from the MCP path)
+2. Run `npx @playwright/cli snapshot` to capture page content
+3. Extract relevant guidance from the snapshot output
+4. After finishing all fetches for the current audit area, run `npx @playwright/cli close`
+5. Record the full URL as source
+
+**Rules:**
+- Both methods fail for a doc path → skip that reference
+- All doc references for an audit area fail → skip the area entirely, note it in the report as "Skipped — documentation unavailable"
+- Never fabricate a URL — only use URLs you successfully fetched
+- Append `(via MCP)` or `(via Playwright CLI)` to source lines in findings for provenance
 
 ## Phase 2: Understand the Project
 
@@ -84,11 +120,13 @@ Using the CONFIRMED GOAL from Phase 3, audit each area below. If you have not ye
 
 For each area below:
 1. Read what currently exists in the project for this area
-2. Fetch the relevant official doc page using `mcp__anthropic-docs__get_doc_page`
+2. Fetch the relevant official doc page using the Documentation Fetching Protocol
 3. Compare the current state against the documentation
 4. Filter through the CONFIRMED GOAL — only include findings that serve this project
 5. Tag each finding: **good** (keep this), **improve** (works but suboptimal), **fix** (against best practices)
-6. Record the doc source URL
+6. Record the doc source URL and retrieval method
+
+HARD RULE: Every finding must cite a doc source you actually fetched in this session. No finding without a retrieved source. If a fetch fails and you cannot retrieve the documentation, that finding does not exist.
 
 ### 4.1 CLAUDE.md
 
@@ -255,7 +293,7 @@ Write `AUDIT-REPORT.md` in the project root using this exact structure:
 - **Current**: What exists now
 - **Recommendation**: What should change (omit for "good" findings)
 - **Project relevance**: Why this matters for this specific project
-- **Source**: [Doc section title](full URL)
+- **Source**: [Doc section title](full URL) (via MCP|Playwright CLI)
 
 [Repeat for each finding. Group by area. Skip areas with no findings.]
 
