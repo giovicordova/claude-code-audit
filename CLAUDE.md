@@ -16,4 +16,3 @@ No code, no build, no tests. Everything is markdown.
 
 - Commit format: `type: description` (e.g., `feat:`, `fix:`, `docs:`, `improve:`)
 - Testing: install skill globally, run `/cc-audit` against a test project, verify report output
-- Changes to SKILL.md: read the full file first, understand all 5 phases, then make targeted edits

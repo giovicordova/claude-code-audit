@@ -8,3 +8,4 @@ paths: ["skills/**/*.md"]
 - Frontmatter fields (`disable-model-invocation: true`, `allowed-tools`) must not change without deliberate reason
 - Every audit area must have: Scan targets, Fetch docs references, Evaluate checklist
 - Report template in Phase 5 must stay in sync with audit areas
+- Before editing: read the full SKILL.md first, understand all 5 phases, then make targeted edits
