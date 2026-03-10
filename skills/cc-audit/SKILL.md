@@ -3,7 +3,7 @@ name: cc-audit
 description: Audit a project's Claude Code setup against official Anthropic documentation. Evaluates CLAUDE.md, skills, sub-agents, hooks, MCP, permissions, settings, feature selection, and rules. Produces AUDIT-REPORT.md.
 disable-model-invocation: true
 context: fork
-allowed-tools: Read, Glob, Grep, Write, Bash, AskUserQuestion, mcp__anthropic-docs__search_anthropic_docs, mcp__anthropic-docs__get_doc_page, mcp__anthropic-docs__list_doc_sections, mcp__anthropic-docs__index_status
+allowed-tools: Read, Glob, Grep, Write, Bash, AskUserQuestion, mcp__anthropic-docs__search_anthropic_docs, mcp__anthropic-docs__get_doc_page, mcp__anthropic-docs__list_doc_sections, mcp__anthropic-docs__index_status, mcp__plugin_context7_context7__resolve-library-id, mcp__plugin_context7_context7__query-docs
 ---
 
 # Claude Code Audit
@@ -78,7 +78,7 @@ Use Glob to search for these patterns in the project root:
 
 ### Step 2: Read what you found
 
-Read each file from Step 1. For package manifests (package.json, pyproject.toml, etc.), focus on name, description, and dependencies.
+Read each file from Step 1. For package manifests (package.json, pyproject.toml, etc.), focus on name, description, and dependencies — extract a list of key dependencies (libraries and services the project relies on).
 
 ### Step 3: Map the Claude Code setup
 
@@ -89,6 +89,7 @@ Use Glob to find everything under `.claude/` (including `.claude/rules/**/*.md`)
 Write down in this exact format:
 - **PROJECT**: [what the project is, 1-2 sentences]
 - **GOAL**: [what it's trying to achieve, 1-2 sentences]
+- **KEY DEPENDENCIES**: [major libraries/services from package manifests — skip if none found]
 - **CLAUDE CODE FEATURES IN USE**: [list]
 
 YOUR NEXT TOOL CALL MUST BE AskUserQuestion. Do not call Read, Grep, Glob, or any other tool next.
@@ -102,6 +103,8 @@ Use AskUserQuestion with this message:
 "**CC Audit — Project Understanding**
 
 From my analysis, this project is [your understanding]. The goal is [your understanding of the goal].
+
+Key dependencies identified: [list, or "none found"]
 
 Claude Code features currently in use: [list what you found]
 
@@ -203,9 +206,20 @@ HARD RULE: Every finding must cite a doc source you actually fetched in this ses
 **Fetch docs:**
 - `/docs/en/mcp`
 
+**Check dependency MCP availability (only if KEY DEPENDENCIES were identified in Phase 2):**
+
+For each key dependency, use Context7 to check if an MCP server exists:
+1. Call `resolve-library-id` with the dependency name + "MCP server" as query
+2. If found, call `query-docs` to confirm it's actually an MCP server
+3. Check whether the project already has it in `.mcp.json`
+4. If not configured → **improve** finding
+
+Skip if no KEY DEPENDENCIES or if Context7 is unavailable.
+
 **Evaluate:**
 - Servers configured at the right scope?
 - External services the project uses that could benefit from MCP?
+- Key dependencies with available MCP servers that aren't configured? (from Context7 check above)
 - Tool search configured for servers with many tools?
 
 ### 4.6 Permissions
@@ -272,22 +286,24 @@ Write `AUDIT-REPORT.md` in the project root using this exact structure:
 
 ## Current State
 
-| Area | Status |
-|------|--------|
-| CLAUDE.md | [Exists / Missing] |
-| Skills | [X found / None] |
-| Sub-agents | [X found / None] |
-| Hooks | [Configured / Not configured] |
-| MCP | [X servers / Not configured] |
-| Permissions | [Configured / Default] |
-| Settings | [Configured / Default] |
-| Rules | [X found / None] |
+| Area | What it is | Status |
+|------|-----------|--------|
+| CLAUDE.md | Your project's instructions to Claude | [Exists / Missing] |
+| Skills | Reusable slash-command workflows | [X found / None] |
+| Sub-agents | Isolated Claude sessions for specific tasks | [X found / None] |
+| Hooks | Automated actions that run before/after Claude acts | [Configured / Not configured] |
+| MCP | Connections to external tools and services | [X servers / Not configured] |
+| Permissions | What Claude is allowed to do without asking | [Configured / Default] |
+| Settings | Project-level Claude Code configuration | [Configured / Default] |
+| Rules | Targeted instructions scoped to specific files or folders | [X found / None] |
 
 ## Findings
 
+**Writing rule:** Write all findings in plain language. Avoid jargon — if a technical term is necessary, explain it briefly in parentheses. The reader is not a developer.
+
 [For each area that has findings, use this format:]
 
-### [Area Name]
+### [Area Name] — [plain description from Current State table]
 
 #### [good/improve/fix] Finding title
 
@@ -300,11 +316,12 @@ Write `AUDIT-REPORT.md` in the project root using this exact structure:
 
 ## Priority Actions
 
-[Top findings ranked by impact. Only include "improve" and "fix" items.]
+[Top findings ranked by impact. Only include "improve" and "fix" items. Keep each action to one sentence.]
 
-1. **[fix]** [Brief description] — [why it is high priority for this project]
-2. **[improve]** [Brief description] — [why it matters]
-3. ...
+| # | Priority | What to do | Why it matters for your project |
+|---|----------|-----------|-------------------------------|
+| 1 | fix | [one-sentence action] | [one-sentence reason] |
+| 2 | improve | [one-sentence action] | [one-sentence reason] |
 
 ## Next Steps
 
