@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "anthropic-docs": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/anthropic-docs-mcp"]
+    }
+  }
+}
