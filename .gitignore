@@ -4,5 +4,5 @@
 *~
 .claude/settings.local.json
 CLAUDE.local.md
-docs/
 AUDIT-REPORT.md
+.playwright-cli/

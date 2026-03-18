@@ -20,36 +20,19 @@ claude mcp add anthropic-docs -- npx -y @anthropic-ai/anthropic-docs-mcp
 
 ### 2. Install the skill
 
-#### Option A: Plugin install (recommended)
-
-Add the marketplace and install:
-
-```
-/plugin marketplace add giovicordova/claude-code-audit
-/plugin install cc-audit@cc-audit-marketplace
-```
-
-#### Option B: Manual install
-
-Clone this repository and copy the skill to your global skills directory:
+Clone and symlink to your global skills directory:
 
 ```bash
 git clone https://github.com/giovicordova/claude-code-audit.git
 mkdir -p ~/.claude/skills
-cp -r claude-code-audit/skills/cc-audit ~/.claude/skills/cc-audit
+ln -s "$(pwd)/claude-code-audit" ~/.claude/skills/cc-audit
 ```
 
-Or create a symlink to stay updated with git pull:
-
-```bash
-git clone https://github.com/giovicordova/claude-code-audit.git
-mkdir -p ~/.claude/skills
-ln -s "$(pwd)/claude-code-audit/skills/cc-audit" ~/.claude/skills/cc-audit
-```
+This keeps the skill updated — just `git pull` to get the latest version.
 
 ### 3. Verify
 
-Open Claude Code in any project and type `/cc-audit`. The skill should appear in autocomplete. Plugin installs use `/cc-audit:cc-audit`, manual installs use `/cc-audit` — autocomplete handles either.
+Open Claude Code in any project and type `/cc-audit`. The skill should appear in autocomplete.
 
 ## Usage
 

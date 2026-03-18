@@ -120,156 +120,52 @@ Do not proceed to Phase 4 until you have written CONFIRMED GOAL above.
 
 ## Phase 4: Audit
 
-Using the CONFIRMED GOAL from Phase 3, audit each area below. If you have not yet confirmed the goal with the user, STOP and go back to Phase 3.
+Using the CONFIRMED GOAL from Phase 3, run the specialist passes below in order. If you have not yet confirmed the goal with the user, STOP and go back to Phase 3.
 
-For each area below:
-1. Read what currently exists in the project for this area
-2. Fetch the relevant official doc page using the Documentation Fetching Protocol
-3. Compare the current state against the documentation
-4. Filter through the CONFIRMED GOAL — only include findings that serve this project
-5. Tag each finding: **good** (keep this), **improve** (works but suboptimal), **fix** (against best practices)
-6. Record the doc source URL and retrieval method
+HARD RULE: Every finding must cite a doc source you actually fetched in this session. If all doc fetches for a specialist's areas fail, skip those areas and note them as "Skipped — documentation unavailable" in the report.
 
-HARD RULE: Every finding must cite a doc source you actually fetched in this session. No finding without a retrieved source. If a fetch fails and you cannot retrieve the documentation, that finding does not exist.
+### Step 4.0: Bulk Doc Fetch
 
-### 4.1 CLAUDE.md
+Fetch all documentation upfront using the Documentation Fetching Protocol. Store all content in working memory — specialists will use it from context.
 
-**Scan:** `CLAUDE.md`, `.claude/CLAUDE.md`, `CLAUDE.local.md`, CLAUDE.md files in subdirectories
-
-**Fetch docs:**
+Paths to fetch:
 - `/docs/en/memory`
 - `/docs/en/best-practices`
-
-**Evaluate:**
-- Does it exist? Should it for this project?
-- Length: under 200 lines as recommended?
-- Content: includes things Claude cannot infer from code?
-- Content: avoids what the docs say to exclude (file-by-file descriptions, standard conventions, long tutorials)?
-- Structure: uses headers and bullets for scanability?
-- Specificity: instructions are concrete and verifiable?
-- Imports: uses @path syntax for additional context where useful?
-- Is any content better suited as a skill, rule, or hook?
-
-### 4.2 Skills
-
-**Scan:** `.claude/skills/`, `.claude/commands/`
-
-**Fetch docs:**
 - `/docs/en/skills`
-
-**Read reference:** `references/skills-guide.md` — official Anthropic skill-building guide covering technical requirements, YAML frontmatter rules, naming conventions, description best practices, patterns, and troubleshooting. Use this alongside the MCP docs to evaluate skills.
-
-**Evaluate:**
-- Proper YAML frontmatter (name, description)?
-- Descriptions clear enough for Claude to know when to use them?
-- `disable-model-invocation` set correctly for side-effect workflows?
-- `user-invocable` set correctly?
-- `allowed-tools` specified where appropriate?
-- Content under 500 lines? Should supporting files exist?
-- Instructions in CLAUDE.md that belong as skills instead?
-- Any skill that should use `context: fork`?
-- Arguments handled properly with $ARGUMENTS?
-
-### 4.3 Sub-agents
-
-**Scan:** `.claude/agents/`
-
-**Fetch docs:**
 - `/docs/en/sub-agents`
-
-**Evaluate:**
-- Required `name` and `description` fields present?
-- Tool restrictions appropriate?
-- Model selection justified?
-- Skills that should be sub-agents (need context isolation)?
-- Sub-agents that should be skills (don't need isolation)?
-- `permissionMode` set appropriately?
-- Could any benefit from persistent memory?
-
-### 4.4 Hooks
-
-**Scan:** `.claude/settings.json` (hooks section), `.claude/settings.local.json`
-
-**Fetch docs:**
 - `/docs/en/hooks-guide`
-
-**Evaluate:**
-- Used for things that must happen deterministically?
-- Matchers specific enough?
-- CLAUDE.md instructions that should be hooks instead?
-- Hook scripts executable and properly referenced?
-
-### 4.5 MCP
-
-**Scan:** `.mcp.json`, `.claude/.mcp.json`
-
-**Fetch docs:**
-- `/docs/en/mcp`
-
-**Check dependency MCP availability (only if KEY DEPENDENCIES were identified in Phase 2):**
-
-For each key dependency, use Context7 to check if an MCP server exists:
-1. Call `resolve-library-id` with the dependency name + "MCP server" as query
-2. If found, call `query-docs` to confirm it's actually an MCP server
-3. Check whether the project already has it in `.mcp.json`
-4. If not configured → **improve** finding
-
-Skip if no KEY DEPENDENCIES or if Context7 is unavailable.
-
-**Evaluate:**
-- Servers configured at the right scope?
-- External services the project uses that could benefit from MCP?
-- Key dependencies with available MCP servers that aren't configured? (from Context7 check above)
-- Tool search configured for servers with many tools?
-
-### 4.6 Permissions
-
-**Scan:** `.claude/settings.json` (permissions section), `.claude/settings.local.json`
-
-**Fetch docs:**
 - `/docs/en/permissions`
-
-**Evaluate:**
-- Safe commands allowlisted to reduce interruptions?
-- Deny rules for dangerous operations?
-- Sandboxing configured for appropriate use cases?
-
-### 4.7 Settings
-
-**Scan:** `.claude/settings.json`, `.claude/settings.local.json`
-
-**Fetch docs:**
 - `/docs/en/settings`
-
-**Evaluate:**
-- Settings at the right scope (project vs local vs user)?
-- Anything misconfigured or using deprecated options?
-
-### 4.8 Feature Selection
-
-**Fetch docs:**
+- `/docs/en/mcp`
 - `/docs/en/features-overview`
 
-**Evaluate:**
-- Is each feature being used for what it is best at?
-- Features being misused (skill where a hook fits better, or vice versa)?
-- Missing features that would serve the project's goal?
-- Overall setup light and efficient, or overengineered?
+### Step 4.1: Instructions Specialist
 
-### 4.9 Rules
+Read `agents/instructions-specialist.md`. Follow its instructions exactly.
+Collect output under "INSTRUCTIONS SPECIALIST FINDINGS."
 
-**Scan:** `.claude/rules/**/*.md`
+### Step 4.2: Components Specialist
 
-**Fetch docs:**
-- `/docs/en/memory`
+Read `agents/components-specialist.md`. Follow its instructions exactly.
+Collect output under "COMPONENTS SPECIALIST FINDINGS."
 
-**Evaluate:**
-- Do rules exist? Should they for this project's size and complexity?
-- Are rules scoped to specific paths using `paths` frontmatter where appropriate?
-- Is each rule file focused on one topic with a descriptive filename?
-- Content in CLAUDE.md that would work better as path-scoped rules?
-- Any rules that conflict with or duplicate CLAUDE.md instructions?
-- Are rules organized into logical subdirectories for larger projects?
+### Step 4.3: Automation Specialist
+
+Read `agents/automation-specialist.md`. Follow its instructions exactly.
+Collect output under "AUTOMATION SPECIALIST FINDINGS."
+
+### Step 4.4: Integration Specialist
+
+Read `agents/integration-specialist.md`. Follow its instructions exactly.
+Collect output under "INTEGRATION SPECIALIST FINDINGS."
+
+### Step 4.5: Adversarial Review
+
+Read `agents/adversarial-reviewer.md`. Follow its instructions exactly.
+Pass it all collected findings from Steps 4.1–4.4 and the CONFIRMED GOAL.
+Replace all collected findings with the filtered set it returns.
+
+Proceed to Phase 5 with the filtered findings only.
 
 ## Phase 5: Write Report
 

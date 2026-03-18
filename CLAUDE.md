@@ -2,15 +2,14 @@
 
 # Project
 
-CC Audit is a Claude Code skill. The entire product is `skills/cc-audit/SKILL.md`.
-No code, no build, no tests. Everything is markdown.
+CC Audit is a Claude Code skill. The repo root IS the skill directory.
+No code, no build, no tests — everything is markdown.
 
 # Architecture
 
-- `skills/cc-audit/SKILL.md` — the skill users run with `/cc-audit`
-- `skills/cc-audit/references/` — bundled reference docs loaded on-demand during audit (progressive disclosure level 3)
-- `.claude-plugin/plugin.json` — plugin manifest for distribution
-- `.claude-plugin/marketplace.json` — marketplace registration
+- `SKILL.md` — the orchestrator skill users run with `/cc-audit`
+- `agents/` — specialist instruction files for Phase 4 audit domains (instructions, components, automation, integration, adversarial reviewer)
+- `references/` — bundled reference docs loaded on-demand during audit (progressive disclosure level 3)
 
 # Workflow
 
